@@ -1,7 +1,7 @@
 (function(angular, $, _) {
 
   angular.module('activitycentre').config(function($routeProvider) {
-      $routeProvider.when('/activitycentre', {
+      $routeProvider.when('/activitycentre/:contactId', {
         controller: 'ActivitycentreActivityCentreCtrl',
         templateUrl: '~/activitycentre/ActivityCentreCtrl.html',
 
@@ -23,7 +23,8 @@
   //   $scope -- This is the set of variables shared between JS and HTML.
   //   crmApi, crmStatus, crmUiHelp -- These are services provided by civicrm-core.
   //   myContact -- The current contact, defined above in config().
-  angular.module('activitycentre').controller('ActivitycentreActivityCentreCtrl', function($scope, crmApi, crmStatus, crmUiHelp, myContact) {
+  angular.module('activitycentre').controller('ActivitycentreActivityCentreCtrl', function($scope, crmApi, crmStatus, crmUiHelp, myContact, $routeParams) {
+      console.log($routeParams);
     // The ts() and hs() functions help load strings for this module.
     var ts = $scope.ts = CRM.ts('activitycentre');
     var hs = $scope.hs = crmUiHelp({file: 'CRM/activitycentre/ActivityCentreCtrl'}); // See: templates/CRM/activitycentre/ActivityCentreCtrl.hlp
