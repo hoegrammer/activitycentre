@@ -2,6 +2,17 @@
 
 require_once 'activitycentre.civix.php';
 
+
+function activitycentre_civicrm_tabset($tabsetName, &$tabs, $context) {
+    if ($tabsetName !== 'civicrm/contact/view') return;
+    $contactId = $context['contact_id'];
+    for($i = 0; $i < sizeof($tabs); $i ++) {
+        if ($tabs[$i]['id'] == 'activity') {
+            $tabs[$i]['url'] = "../a/#/activitycentre/$contactId";
+        }
+    }
+}
+
 /**
  * Implements hook_civicrm_config().
  *

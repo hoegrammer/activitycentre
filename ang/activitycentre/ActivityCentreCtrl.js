@@ -9,10 +9,7 @@
         // under "resolve".
         resolve: {
           myContact: function(crmApi) {
-            return crmApi('Contact', 'getsingle', {
-              id: 'user_contact_id',
-              return: ['first_name', 'last_name']
-            });
+              return {};
           }
         }
       });
@@ -24,13 +21,19 @@
   //   crmApi, crmStatus, crmUiHelp -- These are services provided by civicrm-core.
   //   myContact -- The current contact, defined above in config().
   angular.module('activitycentre').controller('ActivitycentreActivityCentreCtrl', function($scope, crmApi, crmStatus, crmUiHelp, myContact, $routeParams) {
-      console.log($routeParams);
+
+   crmApi('Contact', 'getSingle', {
+      id: $routeParams.contactId,
+      return: ['first_name', 'last_name']
+   }).then(function(data) {
+       console.log(data);
+       myContact = $scope.myContact = data;
+   }); 
+   
     // The ts() and hs() functions help load strings for this module.
     var ts = $scope.ts = CRM.ts('activitycentre');
     var hs = $scope.hs = crmUiHelp({file: 'CRM/activitycentre/ActivityCentreCtrl'}); // See: templates/CRM/activitycentre/ActivityCentreCtrl.hlp
 
-    // We have myContact available in JS. We also want to reference it in HTML.
-    $scope.myContact = myContact;
 
     $scope.save = function save() {
       return crmStatus(
