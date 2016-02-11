@@ -7,14 +7,27 @@
       <p>{{ts('To view more debugging information, edit the URL and include "?angularDebug=1".')}}</p>
     </div>
 
-    <div crm-ui-accordion="{title: ts('Activities')}">
-      <div class="crm-block">
-        <div class="crm-group">
-            <div ngRepeat="(id, activity) in activities">
-                <span>{{activity.case_type}}</span>
-                <span>{{activity.subject}}</span>
-            </div>
-        </div>
+    <div class="crm-block">
+      <div class="crm-group">
+        <table>
+          <tr>
+            <td>Case Type</td>
+            <td>Activity Type</td>
+            <td>Subject</td>
+            <td>Date / Time</td>
+            <td>Status</td>
+          </tr>
+          <tr ng-repeat="activity in activities">
+            <td>{{activity.case_type}}</td>
+            <td>{{activity.activity_type}}</td>
+            <td>{{activity.subject}}</td>
+            <td>{{activity.activity_date_time}}</td>
+            <td>{{activity.status}}</td>
+            <td><a ng-click="viewActivity(activity)">View</a></td>
+            <td><a ng-click="editActivity(activity)">Edit</a></td>
+            <td><a ng-click="deleteActivity(activity)">Delete</a></td>
+          </tr>
+        </table>
       </div>
     </div>
 

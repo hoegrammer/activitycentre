@@ -22,29 +22,61 @@
   //   myContact -- The current contact, defined above in config().
   angular.module('activitycentre').controller('ActivitycentreActivityCentreCtrl', function($scope, crmApi, crmStatus, crmUiHelp, activities, $routeParams) {
 
-    crmApi('Case', 'get', {
-      contact_id: $routeParams.contactId,
-      return: ['id']
-    }).then(function(caseSummaries) {
-      var caseIds = Object.keys(caseSummaries.values);
-      console.log(caseIds);
+    $scope.activities = activities;
+    load();
+
+    function load(callback) {
       crmApi('Case', 'get', {
-        case_id: caseIds    
+        contact_id: $routeParams.contactId,
+        sequential: 1,
+        return: ['id', 'case_type_id.name']
       }).then(function(cases) {
-        caseIds.forEach(function(caseId) {
-          crmApi('Activity', 'get', {
-            activity_id: cases.values[caseId].activities
+        cases.values.forEach(function(_case) {
+          crmApi('CaseActivity', 'get', {
+            case_id: _case.id,
+            sequential: 1,
+            return: ['activity_id', 'activity_type', 'subject', 'activity_date_time', 'status']
           }).then(function(activities) {
-            console.log(activities);
-            activities.forEach(function(activity) {
-              activity.case_id = theCase.id;
-              $scope.activities[id] = activities[id] = activity;
+            activities.values.forEach(function(activity) {  
+              if (!_.find($scope.activities, activity)) {
+                activity['case_type'] = _case['case_type_id.name'];
+                activity['case_id'] = _case.id;
+                $scope.activities.push(activity);
+                $scope.activities = $scope.activities.sort(function(a, b) {
+                  if (a.activity_date_time > b.activity_date_time) return 1;
+                  if (a.activity_date_time < b.activity_date_time) return -1;
+                  return 0;
+                });
+                if (callback) callback();
+              }
             });
           });
         });
       });
-    });
-   
+    }
+
+    function removeActivity(activity) {
+      $scope.activities = _.without($scope.activities, activity);
+    }
+
+    $scope.viewActivity = function(activity) {
+      CRM.loadForm('/civicrm/case/activity/view?aid=' + activity.activity_id + '&cid=' + $routeParams.contactId);
+    }
+
+    $scope.editActivity = function(activity) {
+      var url = '/civicrm/case/activity?id=' + activity.activity_id + '&cid=' + $routeParams.contactId + '&caseid=' + activity['case_id'] 
+          + '&reset=1&action=update&snippet=json';
+      CRM.loadForm(url).on('crmFormSuccess', function() {
+        load(function() {removeActivity(activity);});
+      });
+    }
+    $scope.deleteActivity = function(activity) {
+      var url = '/civicrm/case/activity/delete?aid=' + activity.activity_id + '&cid=' + $routeParams.contactId;
+      CRM.loadForm(url).on('crmFormSuccess', function() {
+        removeActvity(activity);
+      });
+    }
+
     // The ts() and hs() functions help load strings for this module.
     var ts = $scope.ts = CRM.ts('activitycentre');
     var hs = $scope.hs = crmUiHelp({file: 'CRM/activitycentre/ActivityCentreCtrl'}); // See: templates/CRM/activitycentre/ActivityCentreCtrl.hlp
