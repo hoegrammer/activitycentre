@@ -10,6 +10,9 @@
         resolve: {
           activities: function(crmApi) {
               return [];
+          },
+          contact: function(crmApi) {
+              return {};
           }
         }
       });
@@ -20,12 +23,24 @@
   //   $scope -- This is the set of variables shared between JS and HTML.
   //   crmApi, crmStatus, crmUiHelp -- These are services provided by civicrm-core.
   //   myContact -- The current contact, defined above in config().
-  angular.module('activitycentre').controller('ActivitycentreActivityCentreCtrl', function($scope, crmApi, crmStatus, crmUiHelp, activities, $routeParams) {
+  angular.module('activitycentre').controller('ActivitycentreActivityCentreCtrl', function($scope, crmApi, crmStatus, crmUiHelp, activities, contact, $routeParams) {
+
 
     $scope.activities = activities;
-    load();
+    $scope.contact = contact;
+    loadActivities();
+    loadContact();
 
-    function load(callback) {
+    function loadContact() {
+      crmApi('Contact', 'getSingle', {
+        contact_id: $routeParams.contactId,
+        return: ['first_name', 'last_name']
+      }).then(function(contact) {
+        $scope.contact = contact;
+      });
+    }
+
+    function loadActivities(callback) {
       crmApi('Case', 'get', {
         contact_id: $routeParams.contactId,
         sequential: 1,
@@ -42,11 +57,7 @@
                 activity['case_type'] = _case['case_type_id.name'];
                 activity['case_id'] = _case.id;
                 $scope.activities.push(activity);
-                $scope.activities = $scope.activities.sort(function(a, b) {
-                  if (a.activity_date_time > b.activity_date_time) return 1;
-                  if (a.activity_date_time < b.activity_date_time) return -1;
-                  return 0;
-                });
+                $scope.activities = _.sortBy($scope.activities, 'activity_date_time').reverse();
                 if (callback) callback();
               }
             });
@@ -66,8 +77,9 @@
     $scope.editActivity = function(activity) {
       var url = '/civicrm/case/activity?id=' + activity.activity_id + '&cid=' + $routeParams.contactId + '&caseid=' + activity['case_id'] 
           + '&reset=1&action=update&snippet=json';
-      CRM.loadForm(url).on('crmFormSuccess', function() {
-        load(function() {removeActivity(activity);});
+      CRM.loadForm(url).on('crmFormSuccess', function(event, data) {
+        console.log(data);
+        loadActivities(function() {removeActivity(activity);});
       });
     }
     $scope.deleteActivity = function(activity) {

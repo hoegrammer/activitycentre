@@ -1,13 +1,10 @@
 <div class="crm-container">
+  <div crm-ui-debug="contact"></div>
   <div crm-ui-debug="activities"></div>
 
   <form name="myForm" crm-ui-id-scope>
-
-    <div class="help">
-      <p>{{ts('To view more debugging information, edit the URL and include "?angularDebug=1".')}}</p>
-    </div>
-
     <div class="crm-block">
+      <h2>{{contact.first_name}} {{contact.last_name}}</h2>
       <div class="crm-group">
         <table>
           <tr>
