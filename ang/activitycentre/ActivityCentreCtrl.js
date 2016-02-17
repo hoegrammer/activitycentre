@@ -66,7 +66,7 @@
       });
     }
 
-    function removeActivity(activity) {
+    function removeActivityFromScope(activity) {
       $scope.activities = _.without($scope.activities, activity);
     }
 
@@ -83,9 +83,9 @@
       });
     }
     $scope.deleteActivity = function(activity) {
-      var url = '/civicrm/case/activity/delete?aid=' + activity.activity_id + '&cid=' + $routeParams.contactId;
+      var url = '/civicrm/case/activity?reset=1&cid=' + $routeParams.contactId + '&caseid=' + activity.case_id  +  '&action=delete&id=' + activity.activity_id + '&snippet=json';
       CRM.loadForm(url).on('crmFormSuccess', function() {
-        removeActvity(activity);
+        removeActivityFromScope(activity);
       });
     }
 

@@ -5,7 +5,6 @@ require_once 'activitycentre.civix.php';
 
 function activitycentre_civicrm_summaryActions(&$actions, $contactID) {
   $results = civicrm_api3('Contact', 'getsingle', array('contact_id' => $contactID));
-  error_log(print_r($actions, true));
   if (is_array($results['contact_sub_type']) && $results['contact_sub_type'][0] === 'Client') {
     $actions['case work'] = array(
       'title' => 'Case work',
