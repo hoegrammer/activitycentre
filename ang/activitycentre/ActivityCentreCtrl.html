@@ -1,10 +1,16 @@
 <div class="crm-container">
   <div crm-ui-debug="contact"></div>
   <div crm-ui-debug="activities"></div>
+  <div crm-ui-debug="caseTypes"></div>
 
   <form name="myForm" crm-ui-id-scope>
     <div class="crm-block">
       <h2>{{contact.first_name}} {{contact.last_name}}</h2>
+      <select ng-model="caseType" ng-change="setCaseType(caseType)">
+        <option value={{caseType}} ng-repeat="caseType in caseTypes">
+          {{caseType.title}}
+        </option>
+      </select>
       <div class="crm-group">
         <table>
           <tr>

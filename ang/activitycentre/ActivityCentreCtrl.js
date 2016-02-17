@@ -13,6 +13,9 @@
           },
           contact: function(crmApi) {
               return {};
+          },
+          caseTypes: function(crmApi) {
+              return [];
           }
         }
       });
@@ -23,13 +26,16 @@
   //   $scope -- This is the set of variables shared between JS and HTML.
   //   crmApi, crmStatus, crmUiHelp -- These are services provided by civicrm-core.
   //   myContact -- The current contact, defined above in config().
-  angular.module('activitycentre').controller('ActivitycentreActivityCentreCtrl', function($scope, crmApi, crmStatus, crmUiHelp, activities, contact, $routeParams) {
+  angular.module('activitycentre').controller('ActivitycentreActivityCentreCtrl', function($scope, crmApi, crmStatus, crmUiHelp, activities, contact, caseTypes, $routeParams) {
 
 
     $scope.activities = activities;
     $scope.contact = contact;
+    $scope.caseTypes = caseTypes;
+ 
     loadActivities();
     loadContact();
+    loadCaseTypes();
 
     function loadContact() {
       crmApi('Contact', 'getSingle', {
@@ -40,11 +46,19 @@
       });
     }
 
+    function loadCaseTypes() {
+      crmApi('CaseType', 'get', {
+        sequential: 1
+      }).then(function(caseTypes) {
+        $scope.caseTypes = caseTypes.values;
+      });
+    }
+
     function loadActivities(callback) {
       crmApi('Case', 'get', {
         contact_id: $routeParams.contactId,
         sequential: 1,
-        return: ['id', 'case_type_id.name']
+        return: ['id', 'case_type_id.title']
       }).then(function(cases) {
         cases.values.forEach(function(_case) {
           crmApi('CaseActivity', 'get', {
@@ -54,7 +68,7 @@
           }).then(function(activities) {
             activities.values.forEach(function(activity) {  
               if (!_.find($scope.activities, activity)) {
-                activity['case_type'] = _case['case_type_id.name'];
+                activity['case_type'] = _case['case_type_id.title'];
                 activity['case_id'] = _case.id;
                 $scope.activities.push(activity);
                 $scope.activities = _.sortBy($scope.activities, 'activity_date_time').reverse();
@@ -68,6 +82,11 @@
 
     function removeActivityFromScope(activity) {
       $scope.activities = _.without($scope.activities, activity);
+    }
+
+    $scope.setCaseType = function(caseType) {
+      console.log(caseType);
+      $scope.caseType = caseType;
     }
 
     $scope.viewActivity = function(activity) {
