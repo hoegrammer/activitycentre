@@ -2,21 +2,6 @@
 
 require_once 'activitycentre.civix.php';
 
-
-function activitycentre_civicrm_summaryActions(&$actions, $contactID) {
-  $results = civicrm_api3('Contact', 'getsingle', array('contact_id' => $contactID));
-  if (is_array($results['contact_sub_type']) && $results['contact_sub_type'][0] === 'Client') {
-    $actions['case work'] = array(
-      'title' => 'Case work',
-      'weight' => 999,
-      'ref' => 'Case Work',
-      'class' => 'no-popup',
-      'key' => 'casework',
-      'href' => "/civicrm/a/#/activitycentre/$contactID?"
-    );
-  }
-}
-
 /**
  * Implements hook_civicrm_config().
  *

@@ -1,16 +1,18 @@
 <div class="crm-container">
-  <div crm-ui-debug="contact"></div>
-  <div crm-ui-debug="activities"></div>
-  <div crm-ui-debug="caseTypes"></div>
-
   <form name="myForm" crm-ui-id-scope>
     <div class="crm-block">
       <h2>{{contact.first_name}} {{contact.last_name}}</h2>
-      <select ng-model="caseType" ng-change="setCaseType(caseType)">
-        <option value={{caseType}} ng-repeat="caseType in caseTypes">
-          {{caseType.title}}
-        </option>
-      </select>
+      <fieldset>
+        <label>Case Type: </label>
+        <select ng-model="caseTypeId" ng-change="setCaseType()" ng-options="caseType.id as caseType.title for caseType in caseTypes">
+          <option>--</option>
+        </select>
+        <label>Activity Type: </label>
+        <select ng-model="activityTypeName" ng-change="setActivityType()" ng-options="activityType.name for activityType in caseType.definition.activityTypes">
+          <option>--</option>
+        </select>
+        <button ng-click="createActivity()" ng-disabled="nothingToCreate()"=>Create</button>
+      </fieldset>
       <div class="crm-group">
         <table>
           <tr>

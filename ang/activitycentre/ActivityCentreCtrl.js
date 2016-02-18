@@ -4,34 +4,15 @@
       $routeProvider.when('/activitycentre/:contactId', {
         controller: 'ActivitycentreActivityCentreCtrl',
         templateUrl: '~/activitycentre/ActivityCentreCtrl.html',
-
-        // If you need to look up data when opening the page, list it out
-        // under "resolve".
-        resolve: {
-          activities: function(crmApi) {
-              return [];
-          },
-          contact: function(crmApi) {
-              return {};
-          },
-          caseTypes: function(crmApi) {
-              return [];
-          }
-        }
       });
     }
   );
 
-  // The controller uses *injection*. This default injects a few things:
-  //   $scope -- This is the set of variables shared between JS and HTML.
-  //   crmApi, crmStatus, crmUiHelp -- These are services provided by civicrm-core.
-  //   myContact -- The current contact, defined above in config().
-  angular.module('activitycentre').controller('ActivitycentreActivityCentreCtrl', function($scope, crmApi, crmStatus, crmUiHelp, activities, contact, caseTypes, $routeParams) {
+  angular.module('activitycentre').controller('ActivitycentreActivityCentreCtrl', function($scope, crmApi, crmStatus, crmUiHelp, $routeParams) {
 
-
-    $scope.activities = activities;
-    $scope.contact = contact;
-    $scope.caseTypes = caseTypes;
+    $scope.activities = [];
+    $scope.contact = {};
+    $scope.caseTypes = [];
  
     loadActivities();
     loadContact();
@@ -48,7 +29,8 @@
 
     function loadCaseTypes() {
       crmApi('CaseType', 'get', {
-        sequential: 1
+        sequential: 1,
+        is_active: 1
       }).then(function(caseTypes) {
         $scope.caseTypes = caseTypes.values;
       });
@@ -58,8 +40,9 @@
       crmApi('Case', 'get', {
         contact_id: $routeParams.contactId,
         sequential: 1,
-        return: ['id', 'case_type_id.title']
+        return: ['id', 'case_type_id', 'case_type_id.title']
       }).then(function(cases) {
+        $scope.cases = cases.values;
         cases.values.forEach(function(_case) {
           crmApi('CaseActivity', 'get', {
             case_id: _case.id,
@@ -81,12 +64,33 @@
     }
 
     function removeActivityFromScope(activity) {
-      $scope.activities = _.without($scope.activities, activity);
+      // Using $apply because God knows why but it wasn't updating without it
+      $scope.$apply(function() {$scope.activities = _.without($scope.activities, activity)});
     }
 
-    $scope.setCaseType = function(caseType) {
-      console.log(caseType);
-      $scope.caseType = caseType;
+    $scope.setCaseType = function() {
+      $scope.caseType = _.find($scope.caseTypes, {id: $scope.caseTypeId});
+    }
+
+    $scope.setActivityType = function() {
+      crmApi('optionValue', 'get', {
+        sequential: 1,
+        label: $scope.activityTypeName
+      }).then(function(activityTypes) {
+        $scope.activityType = activityTypes.values[0];
+      });
+    }
+
+    $scope.createActivity = function() {
+      var caseId = _.find($scope.cases, {case_type_id: $scope.caseType.id}).id;
+      var activityTypeId = $scope.activityType.value; // because it's an optionValue
+      CRM.loadForm('/civicrm/case/activity?action=add&reset=1&cid=' + $routeParams.contactId + '&caseid=' + caseId  + '&atype=' + activityTypeId + '&snippet=json').on('crmFormSuccess', function(event, data) {
+        loadActivities();
+      });
+    }
+
+    $scope.nothingToCreate = function() {
+      return !$scope.activityType;
     }
 
     $scope.viewActivity = function(activity) {
@@ -97,14 +101,16 @@
       var url = '/civicrm/case/activity?id=' + activity.activity_id + '&cid=' + $routeParams.contactId + '&caseid=' + activity['case_id'] 
           + '&reset=1&action=update&snippet=json';
       CRM.loadForm(url).on('crmFormSuccess', function(event, data) {
-        console.log(data);
-        loadActivities(function() {removeActivity(activity);});
+        loadActivities(function() {removeActivityFromScope(activity);});
       });
     }
     $scope.deleteActivity = function(activity) {
       var url = '/civicrm/case/activity?reset=1&cid=' + $routeParams.contactId + '&caseid=' + activity.case_id  +  '&action=delete&id=' + activity.activity_id + '&snippet=json';
-      CRM.loadForm(url).on('crmFormSuccess', function() {
-        removeActivityFromScope(activity);
+      CRM.loadForm(url).on('crmFormSuccess', function(event, data) {
+        // Yes, it returns success on failure and a handy string to match on.
+        if (data.crmMessages[0].title !== 'Selected Activity cannot be deleted.') {
+          removeActivityFromScope(activity);
+        }
       });
     }
 
