@@ -82,8 +82,20 @@
     }
 
     $scope.createActivity = function() {
-      var caseId = _.find($scope.cases, {case_type_id: $scope.caseType.id}).id;
-      var activityTypeId = $scope.activityType.value; // because it's an optionValue
+      var activityTypeId = $scope.activityType.value; // value rather than id, because it's an optionValue entity
+      var existingCaseOfCorrectType = _.find($scope.cases, {case_type_id: $scope.caseType.id});
+      if (existingCaseOfCorrectType) {
+        showCreatePopup(existingCaseOfCorrectType.id, activityTypeId);
+      } else {
+        crmApi('Case', 'create', {
+          contact_id: $routeParams.contactId, case_type_id: $scope.caseType.name, subject: "General support"
+        }).then(function(newlyCreatedCase) {
+          showCreatePopup(newlyCreatedCase.id, activityTypeId);
+        });  
+      }
+    }
+
+    function showCreatePopup(caseId, activityTypeId) {
       CRM.loadForm('/civicrm/case/activity?action=add&reset=1&cid=' + $routeParams.contactId + '&caseid=' + caseId  + '&atype=' + activityTypeId + '&snippet=json').on('crmFormSuccess', function(event, data) {
         loadActivities();
       });
