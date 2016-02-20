@@ -2,36 +2,48 @@
   <form name="myForm" crm-ui-id-scope>
     <div class="crm-block">
       <h2>{{contact.first_name}} {{contact.last_name}}</h2>
-      <fieldset>
-        <label>Case Type: </label>
-        <select ng-model="caseTypeId" ng-change="setCaseType()" ng-options="caseType.id as caseType.title for caseType in caseTypes">
-          <option>--</option>
-        </select>
-        <label>Activity Type: </label>
-        <select ng-model="activityTypeName" ng-change="setActivityType()" ng-options="activityType.name for activityType in caseType.definition.activityTypes">
-          <option>--</option>
-        </select>
-        <button ng-click="createActivity()" ng-disabled="nothingToCreate()"=>Create</button>
-      </fieldset>
+      <div class="crm-accordion-wrapper ui-widget">
+        <div class="crm-accordion-header">
+          Create Activity
+        </div>
+        <div class="crm-accordion-body">
+          <label>Case Type: </label>
+          <select class="big crm-form-select" ng-model="caseTypeId" ng-change="setCaseType()" ng-options="caseType.id as caseType.title for caseType in caseTypes">
+            <option>--</option>
+          </select>
+          <label>Activity Type: </label>
+          <select class="big crm-form-select" ng-model="activityTypeName" ng-change="setActivityType()" ng-options="activityType.name for activityType in caseType.definition.activityTypes">
+            <option>--</option>
+          </select>
+          <button ng-click="createActivity()" ng-disabled="nothingToCreate()"=>Create</button>
+        </div>
+      </div>
       <div class="crm-group">
         <table>
-          <tr>
-            <td>Case Type</td>
-            <td>Activity Type</td>
-            <td>Subject</td>
-            <td>Date / Time</td>
-            <td>Status</td>
-          </tr>
-          <tr ng-repeat="activity in activities">
-            <td>{{activity.case_type}}</td>
-            <td>{{activity.activity_type}}</td>
-            <td>{{activity.subject}}</td>
-            <td>{{activity.activity_date_time}}</td>
-            <td>{{activity.status}}</td>
-            <td><a ng-click="viewActivity(activity)">View</a></td>
-            <td><a ng-click="editActivity(activity)">Edit</a></td>
-            <td><a ng-click="deleteActivity(activity)">Delete</a></td>
-          </tr>
+          <thead>
+            <tr class="columnheader">
+                <td>Case Type</td>
+                <td>Activity Type</td>
+                <td>Subject</td>
+                <td>Date / Time</td>
+                <td>Status</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="activity in activities" ng-class-even="'even'">
+              <td>{{activity.case_type}}</td>
+              <td>{{activity.activity_type}}</td>
+              <td>{{activity.subject}}</td>
+              <td>{{activity.activity_date_time}}</td>
+              <td>{{activity.status}}</td>
+              <td><a ng-click="viewActivity(activity)">View</a></td>
+              <td><a ng-click="editActivity(activity)">Edit</a></td>
+              <td><a ng-click="deleteActivity(activity)">Delete</a></td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>

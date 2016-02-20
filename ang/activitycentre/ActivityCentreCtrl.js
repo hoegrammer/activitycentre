@@ -44,6 +44,7 @@
       }).then(function(cases) {
         $scope.cases = cases.values;
         cases.values.forEach(function(_case) {
+          console.log(_case);
           crmApi('CaseActivity', 'get', {
             case_id: _case.id,
             sequential: 1,
