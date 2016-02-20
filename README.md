@@ -5,4 +5,4 @@ Civicrm module that allows you to CRUD activities on all of a contact's cases in
 ## Dependencies
 
 * CiviCase
-* CaseActivites API extension 
+* CaseActivity API extension https://github.com/CiviCooP/org.civicoop.api.caseactivity
