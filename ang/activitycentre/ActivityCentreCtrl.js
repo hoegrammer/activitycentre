@@ -75,8 +75,7 @@
     }
 
     function removeActivityFromScope(activity) {
-      // Using $apply because God knows why but it wasn't updating without it
-      $scope.$apply(function() {$scope.activities = _.without($scope.activities, activity)});
+      $scope.activities = _.without($scope.activities, activity)
     }
 
     $scope.setCaseType = function() {
@@ -134,7 +133,10 @@
       CRM.loadForm(url).on('crmFormSuccess', function(event, data) {
         // Yes, it returns success on failure and a handy string to match on.
         if (data.crmMessages[0].title !== 'Selected Activity cannot be deleted.') {
-          removeActivityFromScope(activity);
+          // Using $apply because God knows why but screen wasn't updating without it
+          $scope.$apply(function() {
+            removeActivityFromScope(activity);
+          });
         }
       });
     }
