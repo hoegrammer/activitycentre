@@ -13,6 +13,7 @@
     var now = new Date();
 
     $scope.activities = [];
+    $scope.activityTypes = [];
     $scope.contact = {};
     $scope.caseTypes = [];
  
@@ -34,7 +35,7 @@
         sequential: 1,
         is_active: 1
       }).then(function(caseTypes) {
-        $scope.caseTypes = caseTypes.values;
+        $scope.caseTypes = _.sortBy(caseTypes.values, 'name');
       });
     }
 
@@ -78,6 +79,7 @@
 
     $scope.setCaseType = function() {
       $scope.caseType = _.find($scope.caseTypes, {id: $scope.caseTypeId});
+      $scope.activityTypes = _.sortBy($scope.caseType.definition.activityTypes,'name');
     }
 
     $scope.setActivityType = function() {

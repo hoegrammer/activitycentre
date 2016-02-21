@@ -12,7 +12,7 @@
             <option>--</option>
           </select>
           <label>Activity Type: </label>
-          <select class="big crm-form-select" ng-model="activityTypeName" ng-change="setActivityType()" ng-options="activityType.name for activityType in caseType.definition.activityTypes">
+          <select class="big crm-form-select" ng-model="activityTypeName" ng-change="setActivityType()" ng-options="activityType.name for activityType in activityTypes">
             <option>--</option>
           </select>
           <button ng-click="createActivity()" ng-disabled="nothingToCreate()"=>Create</button>
