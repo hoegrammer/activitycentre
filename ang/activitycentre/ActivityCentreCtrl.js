@@ -10,6 +10,8 @@
 
   angular.module('activitycentre').controller('ActivitycentreActivityCentreCtrl', function($scope, crmApi, crmStatus, crmUiHelp, $routeParams) {
 
+    var now = new Date();
+
     $scope.activities = [];
     $scope.contact = {};
     $scope.caseTypes = [];
@@ -36,6 +38,10 @@
       });
     }
 
+    function isOverdue(activity) {
+      return new Date(activity.activity_date_time) < now && activity.status === "Scheduled";
+    }
+
     function loadActivities(callback) {
       crmApi('Case', 'get', {
         contact_id: $routeParams.contactId,
@@ -54,6 +60,7 @@
               if (!_.find($scope.activities, activity)) {
                 activity['case_type'] = _case['case_type_id.title'];
                 activity['case_id'] = _case.id;
+                activity['overdue_status'] = isOverdue(activity) ? "status-overdue" : "";
                 $scope.activities.push(activity);
                 $scope.activities = _.sortBy($scope.activities, 'activity_date_time').reverse();
                 if (callback) callback();
