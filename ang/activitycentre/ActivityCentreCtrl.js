@@ -51,14 +51,16 @@
       }).then(function(cases) {
         $scope.cases = cases.values;
         cases.values.forEach(function(_case) {
-          console.log(_case);
           crmApi('CaseActivity', 'get', {
             case_id: _case.id,
             sequential: 1,
             return: ['activity_id', 'activity_type', 'subject', 'activity_date_time', 'status']
           }).then(function(activities) {
             activities.values.forEach(function(activity) {  
-              if (!_.find($scope.activities, activity)) {
+              // We don't need to update existing activities, because Civi creates a new
+              // activity for each revision.
+              // We don't want to show Open Case activities.
+              if (!_.find($scope.activities, activity) && activity.activity_type !== "Open Case") {
                 activity['case_type'] = _case['case_type_id.title'];
                 activity['case_id'] = _case.id;
                 activity['overdue_status'] = isOverdue(activity) ? "status-overdue" : "";
@@ -79,8 +81,8 @@
 
     $scope.setCaseType = function() {
       $scope.caseType = _.find($scope.caseTypes, {id: $scope.caseTypeId});
-      $scope.activityTypes = _.sortBy($scope.caseType.definition.activityTypes,'name');
-      $scope.activityType = ''; // otherwise create button remains enabled
+      $scope.activityTypes = _.sortBy($scope.caseType.definition.activityTypes, 'name');
+      delete $scope.activityType; // otherwise create button remains enabled
     }
 
     $scope.setActivityType = function() {
