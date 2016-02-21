@@ -52,7 +52,6 @@
       }).then(function(cases) {
         $scope.cases = cases.values;
         cases.values.forEach(function(_case) {
-          console.log(_case);
           crmApi('CaseActivity', 'get', {
             case_id: _case.id,
             sequential: 1,
@@ -104,15 +103,28 @@
         crmApi('Case', 'create', {
           contact_id: $routeParams.contactId, case_type_id: $scope.caseType.name, subject: $scope.caseType.title
         }).then(function(newlyCreatedCase) {
-          showCreatePopup(newlyCreatedCase.id, activityTypeId);
+          showCreatePopup(newlyCreatedCase.id, activityTypeId, true);
         });  
       }
     }
 
-    function showCreatePopup(caseId, activityTypeId) {
-      CRM.loadForm('/civicrm/case/activity?action=add&reset=1&cid=' + $routeParams.contactId + '&caseid=' + caseId  + '&atype=' + activityTypeId + '&snippet=json').on('crmFormSuccess', function(event, data) {
+    function showCreatePopup(caseId, activityTypeId, deleteCaseOnCancel) {
+      var onClose = function(event) {
+        // If close event was triggered by 'x' button click, it's a cancel
+        if (event.originalEvent && event.originalEvent.currentTarget.className === "ui-dialog-titlebar-close") {
+          onCancel();
+        }
+      }
+      var onCancel = function() {
+        if (deleteCaseOnCancel) {
+          crmApi('Case', 'delete', {
+            case_id: caseId 
+          });
+        }
+      };
+      CRM.loadForm('/civicrm/case/activity?action=add&reset=1&cid=' + $routeParams.contactId + '&caseid=' + caseId  + '&atype=' + activityTypeId + '&snippet=json', {dialog: {close: onClose}}).on('crmFormSuccess', function() {
         loadActivities();
-      });
+      }).on('crmFormCancel', onCancel);
     }
 
     $scope.nothingToCreate = function() {
