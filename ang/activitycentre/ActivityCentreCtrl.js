@@ -46,11 +46,13 @@
     function loadActivities(callback) {
       crmApi('Case', 'get', {
         contact_id: $routeParams.contactId,
+        is_deleted: 0,
         sequential: 1,
         return: ['id', 'case_type_id', 'case_type_id.title']
       }).then(function(cases) {
         $scope.cases = cases.values;
         cases.values.forEach(function(_case) {
+          console.log(_case);
           crmApi('CaseActivity', 'get', {
             case_id: _case.id,
             sequential: 1,
