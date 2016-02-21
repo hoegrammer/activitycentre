@@ -80,6 +80,7 @@
     $scope.setCaseType = function() {
       $scope.caseType = _.find($scope.caseTypes, {id: $scope.caseTypeId});
       $scope.activityTypes = _.sortBy($scope.caseType.definition.activityTypes,'name');
+      $scope.activityType = ''; // otherwise create button remains enabled
     }
 
     $scope.setActivityType = function() {
@@ -98,7 +99,7 @@
         showCreatePopup(existingCaseOfCorrectType.id, activityTypeId);
       } else {
         crmApi('Case', 'create', {
-          contact_id: $routeParams.contactId, case_type_id: $scope.caseType.name, subject: "General support"
+          contact_id: $routeParams.contactId, case_type_id: $scope.caseType.name, subject: $scope.caseType.title
         }).then(function(newlyCreatedCase) {
           showCreatePopup(newlyCreatedCase.id, activityTypeId);
         });  
