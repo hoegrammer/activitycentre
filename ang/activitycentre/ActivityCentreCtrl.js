@@ -10,7 +10,10 @@
 
   angular.module('activitycentre').controller('ActivitycentreActivityCentreCtrl', function($scope, crmApi, crmStatus, crmUiHelp, $routeParams) {
 
+    var now = new Date();
+
     $scope.activities = [];
+    $scope.activityTypes = [];
     $scope.contact = {};
     $scope.caseTypes = [];
  
@@ -32,13 +35,18 @@
         sequential: 1,
         is_active: 1
       }).then(function(caseTypes) {
-        $scope.caseTypes = caseTypes.values;
+        $scope.caseTypes = _.sortBy(caseTypes.values, 'name');
       });
+    }
+
+    function isOverdue(activity) {
+      return new Date(activity.activity_date_time) < now && activity.status === "Scheduled";
     }
 
     function loadActivities(callback) {
       crmApi('Case', 'get', {
         contact_id: $routeParams.contactId,
+        is_deleted: 0,
         sequential: 1,
         return: ['id', 'case_type_id', 'case_type_id.title']
       }).then(function(cases) {
@@ -50,9 +58,13 @@
             return: ['activity_id', 'activity_type', 'subject', 'activity_date_time', 'status']
           }).then(function(activities) {
             activities.values.forEach(function(activity) {  
-              if (!_.find($scope.activities, activity)) {
+              // We don't need to update existing activities, because Civi creates a new
+              // activity for each revision.
+              // We don't want to show Open Case activities.
+              if (!_.find($scope.activities, activity) && activity.activity_type !== "Open Case") {
                 activity['case_type'] = _case['case_type_id.title'];
                 activity['case_id'] = _case.id;
+                activity['overdue_status'] = isOverdue(activity) ? "status-overdue" : "";
                 $scope.activities.push(activity);
                 $scope.activities = _.sortBy($scope.activities, 'activity_date_time').reverse();
                 if (callback) callback();
@@ -64,12 +76,13 @@
     }
 
     function removeActivityFromScope(activity) {
-      // Using $apply because God knows why but it wasn't updating without it
-      $scope.$apply(function() {$scope.activities = _.without($scope.activities, activity)});
+      $scope.activities = _.without($scope.activities, activity)
     }
 
     $scope.setCaseType = function() {
       $scope.caseType = _.find($scope.caseTypes, {id: $scope.caseTypeId});
+      $scope.activityTypes = _.sortBy($scope.caseType.definition.activityTypes, 'name');
+      delete $scope.activityType; // otherwise create button remains enabled
     }
 
     $scope.setActivityType = function() {
@@ -88,17 +101,30 @@
         showCreatePopup(existingCaseOfCorrectType.id, activityTypeId);
       } else {
         crmApi('Case', 'create', {
-          contact_id: $routeParams.contactId, case_type_id: $scope.caseType.name, subject: "General support"
+          contact_id: $routeParams.contactId, case_type_id: $scope.caseType.name, subject: $scope.caseType.title
         }).then(function(newlyCreatedCase) {
-          showCreatePopup(newlyCreatedCase.id, activityTypeId);
+          showCreatePopup(newlyCreatedCase.id, activityTypeId, true);
         });  
       }
     }
 
-    function showCreatePopup(caseId, activityTypeId) {
-      CRM.loadForm('/civicrm/case/activity?action=add&reset=1&cid=' + $routeParams.contactId + '&caseid=' + caseId  + '&atype=' + activityTypeId + '&snippet=json').on('crmFormSuccess', function(event, data) {
+    function showCreatePopup(caseId, activityTypeId, deleteCaseOnCancel) {
+      var onClose = function(event) {
+        // If close event was triggered by 'x' button click, it's a cancel
+        if (event.originalEvent && event.originalEvent.currentTarget.className === "ui-dialog-titlebar-close") {
+          onCancel();
+        }
+      }
+      var onCancel = function() {
+        if (deleteCaseOnCancel) {
+          crmApi('Case', 'delete', {
+            case_id: caseId 
+          });
+        }
+      };
+      CRM.loadForm('/civicrm/case/activity?action=add&reset=1&cid=' + $routeParams.contactId + '&caseid=' + caseId  + '&atype=' + activityTypeId + '&snippet=json', {dialog: {close: onClose}}).on('crmFormSuccess', function() {
         loadActivities();
-      });
+      }).on('crmFormCancel', onCancel);
     }
 
     $scope.nothingToCreate = function() {
@@ -121,7 +147,10 @@
       CRM.loadForm(url).on('crmFormSuccess', function(event, data) {
         // Yes, it returns success on failure and a handy string to match on.
         if (data.crmMessages[0].title !== 'Selected Activity cannot be deleted.') {
-          removeActivityFromScope(activity);
+          // Using $apply because God knows why but screen wasn't updating without it
+          $scope.$apply(function() {
+            removeActivityFromScope(activity);
+          });
         }
       });
     }
