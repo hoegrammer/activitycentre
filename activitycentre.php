@@ -2,6 +2,20 @@
 
 require_once 'activitycentre.civix.php';
 
+// Don't show activity tab for clients. It frightens the children
+function activitycentre_civicrm_tabset($tabsetName, &$tabs, $context) {
+  if ($tabsetName === "civicrm/contact/view") {
+    $result =  civicrm_api3("Contact", "getsingle", array(
+      "id" => $context['contact_id'], 
+      "sequential" => 1,
+      "return" => array("contact_sub_type"))
+    );
+    if (is_array($result['contact_sub_type']) && in_array('Client', $result['contact_sub_type'])) {
+      unset($tabs[3]);
+    }
+  }
+}
+
 /**
  * Implements hook_civicrm_config().
  *
