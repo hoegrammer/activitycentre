@@ -1,6 +1,13 @@
 <?php
 
 require_once 'activitycentre.civix.php';
+function activitycentre_civicrm_alterAPIPermissions($entity, $action, &$params, &$permissions)
+{
+
+  if ($entity == 'case_activity') {
+    $params['check_permissions'] = 0;
+  }
+}
 
 // Don't show activity tab for clients. It frightens the children
 function activitycentre_civicrm_tabset($tabsetName, &$tabs, $context) {
@@ -11,7 +18,12 @@ function activitycentre_civicrm_tabset($tabsetName, &$tabs, $context) {
       "return" => array("contact_sub_type"))
     );
     if (is_array($result['contact_sub_type']) && in_array('Client', $result['contact_sub_type'])) {
-      unset($tabs[3]);
+      foreach($tabs as $index => $tab) {
+        if ($tab['id'] === 'activity') {
+          unset($tabs[$index]);
+          return;
+        }
+      }
     }
   }
 }
