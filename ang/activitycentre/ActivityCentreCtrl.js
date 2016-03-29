@@ -70,6 +70,7 @@
                 if (callback) callback();
               }
             });
+            filterActivities();
           });
         });
       });
@@ -91,10 +92,14 @@
         label: $scope.activityTypeName
       }).then(function(activityTypes) {
         $scope.activityType = activityTypes.values[0];
-        $scope.filteredActivities = $scope.activities.filter(function(activity) {
-          return activity.activity_type_id === $scope.activityType.value // value not id, because it's an optionValue entity
-        });
+        filterActivities();
       });
+    }
+    
+    function filterActivities() {
+        $scope.filteredActivities = $scope.activityType 
+          ? $scope.activities.filter(function(activity) {return activity.activity_type_id === $scope.activityType.value})
+          : $scope.activities;
     }
 
     $scope.createActivity = function() {
@@ -153,6 +158,7 @@
           // Using $apply because God knows why but screen wasn't updating without it
           $scope.$apply(function() {
             removeActivityFromScope(activity);
+            filterActivities();
           });
         }
       });
