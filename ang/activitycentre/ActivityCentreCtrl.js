@@ -91,6 +91,9 @@
         label: $scope.activityTypeName
       }).then(function(activityTypes) {
         $scope.activityType = activityTypes.values[0];
+        $scope.filteredActivities = $scope.activities.filter(function(activity) {
+          return activity.activity_type_id === $scope.activityType.value // value not id, because it's an optionValue entity
+        });
       });
     }
 

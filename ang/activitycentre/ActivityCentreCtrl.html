@@ -31,7 +31,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr ng-repeat="activity in activities" ng-class-even="'even'" class="{{activity.overdue_status}}">
+            <tr ng-repeat="activity in filteredActivities" ng-class-even="'even'" class="{{activity.overdue_status}}">
               <td>{{activity.case_type}}</td>
               <td>{{activity.activity_type}}</td>
               <td>{{activity.subject}}</td>
