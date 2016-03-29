@@ -14,8 +14,10 @@
 
     $scope.activities = [];
     $scope.activityTypes = [];
+    $scope.activityTypeOptions = [];
     $scope.contact = {};
     $scope.caseTypes = [];
+    $scope.caseTypeOptions = [];
  
     loadActivities();
     loadContact();
@@ -36,7 +38,12 @@
         is_active: 1
       }).then(function(caseTypes) {
         $scope.caseTypes = _.sortBy(caseTypes.values, 'name');
+        $scope.caseTypeOptions = makeOptions($scope.caseTypes);
       });
+    }
+
+    function makeOptions(list) {
+      return [{id: 0, title: '--all--', name: '--all--'}].concat(list);
     }
 
     function isOverdue(activity) {
@@ -82,8 +89,14 @@
     }
 
     $scope.setCaseType = function() {
-      $scope.caseType = _.find($scope.caseTypes, {id: $scope.caseTypeId});
-      $scope.activityTypes = _.sortBy($scope.caseType.definition.activityTypes, 'name');
+      if ($scope.caseTypeId > 0) {
+        console.log($scope.caseTypeId);
+        $scope.caseType = _.find($scope.caseTypes, {id: $scope.caseTypeId});
+        $scope.activityTypes = _.sortBy($scope.caseType.definition.activityTypes, 'name');
+        $scope.activityTypeOptions = makeOptions($scope.activityTypes);
+        console.log($scope.activityTypes);
+        console.log($scope.activityTypeOptions);
+      }
       delete $scope.activityType; // otherwise create button remains enabled
       filterActivities();
     }

@@ -6,10 +6,10 @@
         <div class="crm-accordion-header">&nbsp;</div>
         <div class="crm-accordion-body">
           <label>Case Type: </label>
-          <select class="big crm-form-select" ng-model="caseTypeId" ng-change="setCaseType()" ng-options="caseType.id as caseType.title for caseType in caseTypes">
+          <select class="big crm-form-select" ng-model="caseTypeId" ng-change="setCaseType()" ng-options="caseTypeOption.id as caseTypeOption.title for caseTypeOption in caseTypeOptions">
           </select>
           <label>Activity Type: </label>
-          <select class="big crm-form-select" ng-model="activityTypeName" ng-change="setActivityType()" ng-options="activityType.name for activityType in activityTypes">
+          <select class="big crm-form-select" ng-model="activityTypeName" ng-change="setActivityType()" ng-options="activityTypeOption.name for activityTypeOption in activityTypeOptions">
           </select>
           <button class="crm-button" ng-click="createActivity()" ng-disabled="nothingToCreate()">Create</button>
         </div>
