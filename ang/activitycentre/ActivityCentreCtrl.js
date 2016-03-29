@@ -64,6 +64,7 @@
               if (!_.find($scope.activities, activity) && activity.activity_type !== "Open Case") {
                 activity['case_type'] = _case['case_type_id.title'];
                 activity['case_id'] = _case.id;
+                activity['case_type_id'] = _case['case_type_id'];
                 activity['overdue_status'] = isOverdue(activity) ? "status-overdue" : "";
                 $scope.activities.push(activity);
                 $scope.activities = _.sortBy($scope.activities, 'activity_date_time').reverse();
@@ -84,6 +85,7 @@
       $scope.caseType = _.find($scope.caseTypes, {id: $scope.caseTypeId});
       $scope.activityTypes = _.sortBy($scope.caseType.definition.activityTypes, 'name');
       delete $scope.activityType; // otherwise create button remains enabled
+      filterActivities();
     }
 
     $scope.setActivityType = function() {
@@ -99,7 +101,9 @@
     function filterActivities() {
         $scope.filteredActivities = $scope.activityType 
           ? $scope.activities.filter(function(activity) {return activity.activity_type_id === $scope.activityType.value})
-          : $scope.activities;
+          : ($scope.caseTypeId 
+            ? $scope.activities.filter(function(activity) {return activity.case_type_id === $scope.caseTypeId})
+            : $scope.activities);
     }
 
     $scope.createActivity = function() {
