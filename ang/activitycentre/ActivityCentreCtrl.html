@@ -3,7 +3,7 @@
     <div class="crm-block">
       <h2>{{contact.first_name}} {{contact.last_name}}</h2>
       <div class="crm-accordion-wrapper">
-        <div class="crm-accordion-header">&nbsp;</div>
+        <div class="crm-accordion-header"><strong>FILTER / CREATE ACTIVITY</strong></div>
         <div class="crm-accordion-body">
           <label>Case Type: </label>
           <select class="big crm-form-select" ng-model="caseTypeId" ng-change="setCaseType()" ng-options="caseTypeOption.id as caseTypeOption.title for caseTypeOption in caseTypeOptions">

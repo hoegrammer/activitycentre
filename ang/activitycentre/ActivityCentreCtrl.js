@@ -11,13 +11,18 @@
   angular.module('activitycentre').controller('ActivitycentreActivityCentreCtrl', function($scope, crmApi, crmStatus, crmUiHelp, $routeParams) {
 
     var now = new Date();
+    var defaultOptionText = '--all--';
+    var defaultCaseType = {id: 0, title: defaultOptionText};
+    var defaultActivityType = {name: defaultOptionText};
 
     $scope.activities = [];
     $scope.activityTypes = [];
     $scope.activityTypeOptions = [];
+    $scope.activityTypeName = defaultActivityType;
     $scope.contact = {};
     $scope.caseTypes = [];
     $scope.caseTypeOptions = [];
+    $scope.caseTypeId = defaultCaseType.id;
  
     loadActivities();
     loadContact();
@@ -38,12 +43,12 @@
         is_active: 1
       }).then(function(caseTypes) {
         $scope.caseTypes = _.sortBy(caseTypes.values, 'name');
-        $scope.caseTypeOptions = makeOptions($scope.caseTypes);
+        $scope.caseTypeOptions = makeOptions(defaultCaseType, $scope.caseTypes);
       });
     }
 
-    function makeOptions(list) {
-      return [{id: 0, title: '--all--', name: '--all--'}].concat(list);
+    function makeOptions(defaultOption, list) {
+      return [defaultOption].concat(list);
     }
 
     function isOverdue(activity) {
@@ -92,7 +97,7 @@
       if ($scope.caseTypeId > 0) {
         $scope.caseType = _.find($scope.caseTypes, {id: $scope.caseTypeId});
         $scope.activityTypes = _.sortBy($scope.caseType.definition.activityTypes, 'name');
-        $scope.activityTypeOptions = makeOptions($scope.activityTypes);
+        $scope.activityTypeOptions = makeOptions(defaultActivityType, $scope.activityTypes);
       }
       delete $scope.activityType;
       filterActivities();
@@ -101,7 +106,6 @@
     $scope.setActivityType = function() {
       // The "all" option is an object; the others are just names.
       if ($scope.activityTypeName.id !== 0) {
-        console.log($scope.activityTypeName);
         crmApi('optionValue', 'get', {
           sequential: 1,
           label: $scope.activityTypeName
@@ -110,7 +114,6 @@
           filterActivities();
         });
       } else {
-        console.log('here');
         delete $scope.activityType;
         filterActivities();
       }
