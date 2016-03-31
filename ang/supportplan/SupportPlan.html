@@ -1,0 +1,50 @@
+<div class="crm-container">
+  <form name="myForm" crm-ui-id-scope>
+  <div class="crm-block">
+    <h1>{{contact.first_name}} {{contact.last_name}}</h1>
+    <p><a href="../contact/view?cid={{contact.id}}"><i>&laquo;&laquo; Back to client record</i></a></p>
+      <div class="crm-accordion-wrapper">
+        <div class="crm-accordion-header"><strong>FILTER / CREATE ACTIVITY</strong></div>
+        <div class="crm-accordion-body">
+          <label>Case Type: </label>
+          <select class="big crm-form-select" ng-model="caseTypeId" ng-change="setCaseType()" ng-options="caseTypeOption.id as caseTypeOption.title for caseTypeOption in caseTypeOptions">
+          </select>
+          <label>Activity Type: </label>
+          <select class="big crm-form-select" ng-model="activityTypeName" ng-change="setActivityType()" ng-options="activityTypeOption.name for activityTypeOption in activityTypeOptions">
+          </select>
+          <button class="crm-button" ng-click="createActivity()" ng-disabled="nothingToCreate()">Create</button>
+        </div>
+      </div>
+      <div class="crm-group">
+        <table>
+          <thead>
+            <tr class="columnheader">
+                <td>Case Type</td>
+                <td>Activity Type</td>
+                <td>Subject</td>
+                <td>Date / Time</td>
+                <td>Status</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="activity in filteredActivities" ng-class-even="'even'" class="{{activity.overdue_status}}">
+              <td>{{activity.case_type}}</td>
+              <td>{{activity.activity_type}}</td>
+              <td>{{activity.subject}}</td>
+              <td>{{activity.activity_date_time}}</td>
+              <td>{{activity.status}}</td>
+              <td><a ng-click="viewActivity(activity)">View</a></td>
+              <td><a ng-click="editActivity(activity)">Edit</a></td>
+              <td><a ng-click="deleteActivity(activity)">Delete</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </form>
+
+</div>
