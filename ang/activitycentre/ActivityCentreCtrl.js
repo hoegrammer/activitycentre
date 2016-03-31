@@ -90,25 +90,30 @@
 
     $scope.setCaseType = function() {
       if ($scope.caseTypeId > 0) {
-        console.log($scope.caseTypeId);
         $scope.caseType = _.find($scope.caseTypes, {id: $scope.caseTypeId});
         $scope.activityTypes = _.sortBy($scope.caseType.definition.activityTypes, 'name');
         $scope.activityTypeOptions = makeOptions($scope.activityTypes);
-        console.log($scope.activityTypes);
-        console.log($scope.activityTypeOptions);
       }
-      delete $scope.activityType; // otherwise create button remains enabled
+      delete $scope.activityType;
       filterActivities();
     }
 
     $scope.setActivityType = function() {
-      crmApi('optionValue', 'get', {
-        sequential: 1,
-        label: $scope.activityTypeName
-      }).then(function(activityTypes) {
-        $scope.activityType = activityTypes.values[0];
+      // The "all" option is an object; the others are just names.
+      if ($scope.activityTypeName.id !== 0) {
+        console.log($scope.activityTypeName);
+        crmApi('optionValue', 'get', {
+          sequential: 1,
+          label: $scope.activityTypeName
+        }).then(function(activityTypes) {
+          $scope.activityType = activityTypes.values[0];
+          filterActivities();
+        });
+      } else {
+        console.log('here');
+        delete $scope.activityType;
         filterActivities();
-      });
+      }
     }
     
     function filterActivities() {
